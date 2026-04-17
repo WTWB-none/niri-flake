@@ -2857,7 +2857,7 @@
                     tiled-state = nullable types.bool;
                   }
                   {
-                    background-effects = nullable (record {
+                    background-effect = nullable (record {
                       blur = nullable types.bool;
                     });
                   }
@@ -3744,6 +3744,9 @@
             (nullable leaf "variable-refresh-rate" cfg.variable-refresh-rate)
             (nullable leaf "scroll-factor" cfg.scroll-factor)
             (nullable leaf "tiled-state" cfg.tiled-state)
+            (nullable map' plain' (cfg: [
+              (nullable leaf "blur" cfg.blur)
+            ]) "background-effect" cfg.background-effect)
           ])
         ]))
         (each cfg.layer-rules (cfg: [
