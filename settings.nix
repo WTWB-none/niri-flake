@@ -582,6 +582,36 @@
         saturation = nullable float-or-int;
       });
 
+      global-blur = submodule {
+        options = {
+          enable = optional types.bool true // {
+            description = ''
+              Whether to enable global blur.
+            '';
+          };
+          passes = optional types.int 2 // {
+            description = ''
+              The number of blur passes to apply.
+            '';
+          };
+          offset = optional float-or-int 1.0 // {
+            description = ''
+              The blur offset in logical pixels.
+            '';
+          };
+          noise = optional float-or-int 0.0 // {
+            description = ''
+              The amount of noise to apply on top of the blur.
+            '';
+          };
+          saturation = optional float-or-int 1.0 // {
+            description = ''
+              The saturation multiplier to apply after blurring.
+            '';
+          };
+        };
+      };
+
       shadow-descriptions =
         let
           css-box-shadow =
@@ -2236,6 +2266,14 @@
           }
 
           {
+            blur = nullable global-blur // {
+              description = ''
+                Global blur configuration.
+              '';
+            };
+          }
+
+          {
             animations =
               let
                 animation-kind = types.attrTag {
@@ -3504,6 +3542,17 @@
           (nullable leaf "saturation" cfg.saturation)
         ]);
 
+        global-blur' = map' (nullable plain) (
+          cfg: [
+            (toggle "off" cfg [
+              (leaf "passes" cfg.passes)
+              (leaf "offset" cfg.offset)
+              (leaf "noise" cfg.noise)
+              (leaf "saturation" cfg.saturation)
+            ])
+          ]
+        );
+
         transform =
           cfg:
           let
@@ -3654,6 +3703,8 @@
             ])
           ])
         ])
+
+        (global-blur' "blur" cfg.blur)
 
         (plain "layout" [
           (leaf "gaps" cfg.layout.gaps)

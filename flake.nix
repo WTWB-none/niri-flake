@@ -427,7 +427,8 @@
               has-background-effect = rule: (rule.background-effect or null) != null;
               settings = cfg.settings or { };
             in
-            builtins.any has-background-effect (settings.window-rules or [ ])
+            (settings.blur or null) != null
+            || builtins.any has-background-effect (settings.window-rules or [ ])
             || builtins.any has-background-effect (settings.layer-rules or [ ]);
         in
         {
@@ -455,7 +456,7 @@
             {
               assertion = !uses-background-effect || is-background-effect-supported;
               message = ''
-                `programs.niri.settings.{window-rules,layer-rules}.*.background-effect` requires a niri build with window effects support.
+                `programs.niri.settings.blur` and `programs.niri.settings.{window-rules,layer-rules}.*.background-effect` require a niri build with window effects support.
 
                 The selected package is `${cfg.package.name or cfg.package.pname or "niri"}`
                 with version `${cfg.package.version or "unknown"}`, which is too old.

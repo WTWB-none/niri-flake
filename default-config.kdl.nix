@@ -149,6 +149,16 @@ in {
       (leaf "position" { x=1280; y=0; })
     ])
 
+    (plain "blur" [
+      # Uncomment this line to disable global blur.
+      # (flag "off")
+
+      (leaf "passes" 3)
+      (leaf "offset" 3.0)
+      (leaf "noise" 0.02)
+      (leaf "saturation" 1.5)
+    ])
+
     (plain "layout" [
       # By default focus ring and border are rendered as a solid background rectangle
       # behind windows. That is, they will show up through semitransparent windows.

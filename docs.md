@@ -15,7 +15,7 @@ You should preferably not be using these outputs directly. Instead, you should u
 
 The latest stable tagged version of niri, along with potential patches.
 
-Currently, this is release [`25.08`](https://github.com/YaLTeR/niri/releases/tag/25.08) with no additional patches.
+Currently, this is release [`25.11`](https://github.com/YaLTeR/niri/releases/tag/25.11) with no additional patches.
 
 
 
@@ -2010,6 +2010,48 @@ The left and right structs work in a similar way, except the padded space is not
 - default: `0`
 
 
+## `programs.niri.settings.blur`
+- type: `null or (submodule)`
+- default: `null`
+
+Global blur configuration.
+
+
+## `programs.niri.settings.blur.enable`
+- type: `boolean`
+- default: `true`
+
+Whether to enable global blur.
+
+
+## `programs.niri.settings.blur.noise`
+- type: `floating point number or signed integer`
+- default: `0.000000`
+
+The amount of noise to apply on top of the blur.
+
+
+## `programs.niri.settings.blur.offset`
+- type: `floating point number or signed integer`
+- default: `1.000000`
+
+The blur offset in logical pixels.
+
+
+## `programs.niri.settings.blur.passes`
+- type: `signed integer`
+- default: `2`
+
+The number of blur passes to apply.
+
+
+## `programs.niri.settings.blur.saturation`
+- type: `floating point number or signed integer`
+- default: `1.000000`
+
+The saturation multiplier to apply after blurring.
+
+
 <!-- programs.niri.settings.animations -->
 
 ## `programs.niri.settings.animations.enable`
@@ -3028,6 +3070,31 @@ Takes effect only when the window is on an output with [`outputs.<name>.variable
 - default: `null`
 
 
+## `programs.niri.settings.window-rules.*.background-effect`
+- type: `null or (submodule)`
+- default: `null`
+
+
+## `programs.niri.settings.window-rules.*.background-effect.blur`
+- type: `null or boolean`
+- default: `null`
+
+
+## `programs.niri.settings.window-rules.*.background-effect.noise`
+- type: `null or floating point number or signed integer`
+- default: `null`
+
+
+## `programs.niri.settings.window-rules.*.background-effect.saturation`
+- type: `null or floating point number or signed integer`
+- default: `null`
+
+
+## `programs.niri.settings.window-rules.*.background-effect.xray`
+- type: `null or boolean`
+- default: `null`
+
+
 ## `programs.niri.settings.layer-rules`
 - type: `list of (layer rule)`
 
@@ -3182,6 +3249,31 @@ The opacity of the layer surface, ranging from 0 to 1.
 If the final value of this field is null, niri will fall back to a value of 1.
 
 Note that this is applied in addition to the opacity set by the client. Setting this to a semitransparent value on a layer surface that is already semitransparent will make it even more transparent.
+
+
+## `programs.niri.settings.layer-rules.*.background-effect`
+- type: `null or (submodule)`
+- default: `null`
+
+
+## `programs.niri.settings.layer-rules.*.background-effect.blur`
+- type: `null or boolean`
+- default: `null`
+
+
+## `programs.niri.settings.layer-rules.*.background-effect.noise`
+- type: `null or floating point number or signed integer`
+- default: `null`
+
+
+## `programs.niri.settings.layer-rules.*.background-effect.saturation`
+- type: `null or floating point number or signed integer`
+- default: `null`
+
+
+## `programs.niri.settings.layer-rules.*.background-effect.xray`
+- type: `null or boolean`
+- default: `null`
 
 
 ## `programs.niri.settings.layer-rules.*.geometry-corner-radius`
