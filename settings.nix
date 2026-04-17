@@ -578,8 +578,6 @@
       background-effect-rule = nullable (record {
         xray = nullable types.bool;
         blur = nullable types.bool;
-        noise = nullable float-or-int;
-        saturation = nullable float-or-int;
       });
 
       global-blur = submodule {
@@ -3538,20 +3536,16 @@
         background-effect = map' plain' (cfg: [
           (nullable leaf "xray" cfg.xray)
           (nullable leaf "blur" cfg.blur)
-          (nullable leaf "noise" cfg.noise)
-          (nullable leaf "saturation" cfg.saturation)
         ]);
 
-        global-blur' = map' (nullable plain) (
-          cfg: [
-            (toggle "off" cfg [
-              (leaf "passes" cfg.passes)
-              (leaf "offset" cfg.offset)
-              (leaf "noise" cfg.noise)
-              (leaf "saturation" cfg.saturation)
-            ])
-          ]
-        );
+        global-blur' = nullable map' (nullable plain) (cfg: [
+          (toggle "off" cfg [
+            (leaf "passes" cfg.passes)
+            (leaf "offset" cfg.offset)
+            (leaf "noise" cfg.noise)
+            (leaf "saturation" cfg.saturation)
+          ])
+        ]);
 
         transform =
           cfg:
