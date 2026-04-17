@@ -1494,45 +1494,46 @@
                     '';
                   };
                 };
+                recent-windows-type = ordered-record [
+                  {
+                    enable = nullable types.bool // {
+                      description = ''
+                        Whether to enable the recent windows switcher.
+                      '';
+                    };
+                    debounce-ms = nullable types.int // {
+                      description = ''
+                        Delay, in milliseconds, before a newly focused window is committed to the recent windows list.
+                      '';
+                    };
+                    open-delay-ms = nullable types.int // {
+                      description = ''
+                        Delay, in milliseconds, before the switcher appears on screen.
+                      '';
+                    };
+                  }
+                  {
+                    highlight = nullable (record {
+                      active-color = nullable types.str;
+                      urgent-color = nullable types.str;
+                      padding = nullable types.int;
+                      corner-radius = nullable float-or-int;
+                    });
+                    previews = nullable (record {
+                      max-height = nullable types.int;
+                      max-scale = nullable float-or-int;
+                    });
+                    binds = attrs-record' "recent windows keybind" {
+                      action = required (rename "recent windows action" kdl.types.kdl-leaf);
+                    } // {
+                      description = ''
+                        Binds that open and navigate the recent windows switcher.
+                      '';
+                    };
+                  }
+                ];
               in
-              nullable (ordered-section [
-                {
-                  enable = nullable types.bool // {
-                    description = ''
-                      Whether to enable the recent windows switcher.
-                    '';
-                  };
-                  debounce-ms = nullable types.int // {
-                    description = ''
-                      Delay, in milliseconds, before a newly focused window is committed to the recent windows list.
-                    '';
-                  };
-                  open-delay-ms = nullable types.int // {
-                    description = ''
-                      Delay, in milliseconds, before the switcher appears on screen.
-                    '';
-                  };
-                }
-                {
-                  highlight = nullable (record {
-                    active-color = nullable types.str;
-                    urgent-color = nullable types.str;
-                    padding = nullable types.int;
-                    corner-radius = nullable float-or-int;
-                  });
-                  previews = nullable (record {
-                    max-height = nullable types.int;
-                    max-scale = nullable float-or-int;
-                  });
-                  binds = attrs-record' "recent windows keybind" {
-                    action = required (rename "recent windows action" kdl.types.kdl-leaf);
-                  } // {
-                    description = ''
-                      Binds that open and navigate the recent windows switcher.
-                    '';
-                  };
-                }
-              ])
+              nullable recent-windows-type
               // {
                 description = ''
                   Configure the recent windows switcher.
