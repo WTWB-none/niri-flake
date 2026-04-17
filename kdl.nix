@@ -13,10 +13,12 @@ let
         arguments = [ ];
         properties = { };
       };
+  normalize-children = children: lib.remove null (lib.flatten (lib.toList children));
+
   node = name: args: children: {
     inherit name;
     inherit (fold-args (lib.toList args)) arguments properties;
-    inherit children;
+    children = normalize-children children;
   };
 
   plain = name: node name [ ];

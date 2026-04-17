@@ -3759,7 +3759,7 @@
             (nullable leaf "variable-refresh-rate" cfg.variable-refresh-rate)
             (nullable leaf "scroll-factor" cfg.scroll-factor)
             (nullable leaf "tiled-state" cfg.tiled-state)
-            (background-effect "background-effect" cfg.background-effect)
+            (nullable background-effect "background-effect" cfg.background-effect)
           ])
         ]))
         (each cfg.layer-rules (cfg: [
@@ -3768,7 +3768,7 @@
             (map (leaf "exclude") (map opt-props cfg.excludes))
             (nullable leaf "opacity" cfg.opacity)
             (nullable leaf "block-out-from" cfg.block-out-from)
-            (background-effect "background-effect" cfg.background-effect)
+            (nullable background-effect "background-effect" cfg.background-effect)
             (shadow-rule "shadow" cfg.shadow)
             (nullable (map' leaf corner-radius) "geometry-corner-radius" cfg.geometry-corner-radius)
             (nullable leaf "place-within-backdrop" cfg.place-within-backdrop)
