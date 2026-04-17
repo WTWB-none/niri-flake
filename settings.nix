@@ -3850,8 +3850,12 @@
               (flag' "focus-at-startup" cfg.focus-at-startup)
               (map' leaf transform "transform" cfg.transform)
               (nullable leaf "position" cfg.position)
-              (nullable (name: cfg:
-                node name [ cfg."mode-string" ] (lib.optionalAttrs (cfg.custom or false) { custom = true; })
+              (nullable (
+                name: cfg:
+                let
+                  rendered = mode cfg;
+                in
+                node name [ rendered."mode-string" ] (lib.optionalAttrs (rendered.custom or false) { custom = true; })
               ) "mode" cfg.mode)
               (nullable leaf "modeline" cfg.modeline)
               (optional-node (cfg.variable-refresh-rate != false) (
