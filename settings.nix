@@ -575,6 +575,13 @@
         bottom-left = required types.float;
       });
 
+      background-effect-rule = nullable (record {
+        xray = nullable types.bool;
+        blur = nullable types.bool;
+        noise = nullable float-or-int;
+        saturation = nullable float-or-int;
+      });
+
       shadow-descriptions =
         let
           css-box-shadow =
@@ -2857,9 +2864,7 @@
                     tiled-state = nullable types.bool;
                   }
                   {
-                    background-effect = nullable (record {
-                      blur = required types.bool;
-                    });
+                    background-effect = background-effect-rule;
                   }
                 ]
               )
@@ -2930,6 +2935,9 @@
                     opacity = nullable types.float // {
                       description = layer-rule-descriptions.opacity;
                     };
+                  }
+                  {
+                    background-effect = background-effect-rule;
                   }
                   {
                     shadow = shadow-rule;
@@ -3489,6 +3497,13 @@
           cfg.bottom-left
         ];
 
+        background-effect = map' plain' (cfg: [
+          (nullable leaf "xray" cfg.xray)
+          (nullable leaf "blur" cfg.blur)
+          (nullable leaf "noise" cfg.noise)
+          (nullable leaf "saturation" cfg.saturation)
+        ]);
+
         transform =
           cfg:
           let
@@ -3744,9 +3759,7 @@
             (nullable leaf "variable-refresh-rate" cfg.variable-refresh-rate)
             (nullable leaf "scroll-factor" cfg.scroll-factor)
             (nullable leaf "tiled-state" cfg.tiled-state)
-            (nullable map' plain' (cfg: [
-              (nullable leaf "blur" cfg.blur)
-            ]) "background-effect" cfg.background-effect)
+            (background-effect "background-effect" cfg.background-effect)
           ])
         ]))
         (each cfg.layer-rules (cfg: [
@@ -3755,6 +3768,7 @@
             (map (leaf "exclude") (map opt-props cfg.excludes))
             (nullable leaf "opacity" cfg.opacity)
             (nullable leaf "block-out-from" cfg.block-out-from)
+            (background-effect "background-effect" cfg.background-effect)
             (shadow-rule "shadow" cfg.shadow)
             (nullable (map' leaf corner-radius) "geometry-corner-radius" cfg.geometry-corner-radius)
             (nullable leaf "place-within-backdrop" cfg.place-within-backdrop)
