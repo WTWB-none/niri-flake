@@ -2856,11 +2856,17 @@
                   {
                     tiled-state = nullable types.bool;
                   }
+                  {
+                    background-effects = nullable (record {
+                      blur = nullable types.bool;
+                    });
+                  }
                 ]
               )
               // {
                 description = window-rule-descriptions.top-option;
               };
+
           }
 
           {
