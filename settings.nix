@@ -610,6 +610,34 @@
         };
       };
 
+      hot-corners-type = record {
+        enable = optional types.bool true // {
+          description = ''
+            Whether to enable hot corners.
+          '';
+        };
+        top-left = optional types.bool false // {
+          description = ''
+            Whether to enable the top-left hot corner.
+          '';
+        };
+        top-right = optional types.bool false // {
+          description = ''
+            Whether to enable the top-right hot corner.
+          '';
+        };
+        bottom-left = optional types.bool false // {
+          description = ''
+            Whether to enable the bottom-left hot corner.
+          '';
+        };
+        bottom-right = optional types.bool false // {
+          description = ''
+            Whether to enable the bottom-right hot corner.
+          '';
+        };
+      };
+
       shadow-descriptions =
         let
           css-box-shadow =
@@ -1377,6 +1405,13 @@
                     The name of the output the workspace should be assigned to.
                   '';
                 };
+                layout = nullable kdl.types.kdl-nodes // {
+                  description = ''
+                    Workspace-specific ${fmt.code "layout {}"} override.
+
+                    This is represented as raw KDL child nodes inside the workspace's ${fmt.code "layout"} block.
+                  '';
+                };
               })
               // {
                 description = ''
@@ -1445,6 +1480,59 @@
                 color = nullable types.str;
               };
             };
+          }
+
+          {
+            recent-windows =
+              let
+                recent-windows-bind = record' "recent windows bind" {
+                  action = required (rename "recent windows action" kdl.types.kdl-leaf) // {
+                    description = ''
+                      A recent windows action represented as an attrset with a single key.
+
+                      Supported actions are ${fmt.code "next-window"} and ${fmt.code "previous-window"}. They may additionally take ${fmt.code ''filter = "app-id"''} and ${fmt.code ''scope = "all" | "output" | "workspace"''} properties.
+                    '';
+                  };
+                };
+              in
+              ordered-section [
+                {
+                  enable = optional types.bool true // {
+                    description = ''
+                      Whether to enable the recent windows switcher.
+                    '';
+                  };
+                  debounce-ms = optional types.int 750 // {
+                    description = ''
+                      Delay, in milliseconds, before a newly focused window is committed to the recent windows list.
+                    '';
+                  };
+                  open-delay-ms = optional types.int 150 // {
+                    description = ''
+                      Delay, in milliseconds, before the switcher appears on screen.
+                    '';
+                  };
+                }
+                {
+                  highlight = section {
+                    active-color = optional types.str "#999999ff";
+                    urgent-color = optional types.str "#ff9999ff";
+                    padding = optional types.int 30;
+                    corner-radius = optional float-or-int 0;
+                  };
+                  previews = section {
+                    max-height = optional types.int 480;
+                    max-scale = optional float-or-int 0.5;
+                  };
+                  binds = attrs-record' "recent windows keybind" {
+                    action = required (rename "recent windows action" kdl.types.kdl-leaf);
+                  } // {
+                    description = ''
+                      Binds that open and navigate the recent windows switcher.
+                    '';
+                  };
+                }
+              ];
           }
 
           {
@@ -1913,6 +2001,11 @@
                       The refresh rate of this output. When this is null, but the resolution is set, niri will automatically pick the highest available refresh rate.
                     '';
                   };
+                  custom = optional types.bool false // {
+                    description = ''
+                      Whether to treat this as a custom mode rather than one advertised by the monitor.
+                    '';
+                  };
                 })
                 // {
                   description = ''
@@ -1921,6 +2014,33 @@
                     By default, when this is null, niri will automatically pick a mode for you.
 
                     If this is set to an invalid mode (i.e unsupported by this output), niri will act as if it is unset and pick one for you.
+                  '';
+                };
+              modeline =
+                nullable (types.listOf types.anything)
+                // {
+                  description = ''
+                    A custom modeline for this output.
+
+                    This corresponds to the raw arguments of the KDL ${fmt.code "modeline"} node, for example:
+
+                    ${fmt.nix-code-block ''
+                      {
+                        ${options.outputs}."eDP-3".modeline = [
+                          173.00
+                          1920
+                          2048
+                          2248
+                          2576
+                          1080
+                          1083
+                          1088
+                          1120
+                          "-hsync"
+                          "+vsync"
+                        ];
+                      }
+                    ''}
                   '';
                 };
 
@@ -1947,6 +2067,20 @@
                   If multiple outputs with ${fmt.code "focus-at-startup"} are connected, then the one with the key that sorts first will be focused. You can change the key to affect the sorting order, and set ${link-opt (subopts options.outputs).name} to be the actual name of the output.
 
                   When none of the connected outputs are explicitly focus-at-startup, niri will focus the first one sorted by name (same output sorting as used elsewhere in niri).
+                '';
+              };
+              hot-corners = nullable hot-corners-type // {
+                description = ''
+                  Override hot corners for this output.
+
+                  When this is null, the global ${link' [ "programs" "niri" "settings" "gestures" "hot-corners" ]} settings are used.
+                '';
+              };
+              layout = nullable kdl.types.kdl-nodes // {
+                description = ''
+                  Output-specific ${fmt.code "layout {}"} override.
+
+                  This is represented as raw KDL child nodes inside the output's ${fmt.code "layout"} block.
                 '';
               };
             });
@@ -2481,11 +2615,13 @@
                       This does not happen when the overview is not open.
                     '';
                   };
-                hot-corners.enable = optional types.bool true // {
-                  description = ''
-                    Put your mouse at the very top-left corner of a monitor to toggle the overview. Also works during drag-and-dropping something.
-                  '';
-                };
+                hot-corners =
+                  optional hot-corners-type { }
+                  // {
+                    description = ''
+                      Put your mouse at configured monitor corners to toggle the overview. Also works during drag-and-dropping something.
+                    '';
+                  };
               };
           }
 
@@ -2693,6 +2829,17 @@
                         If the final value of this field is null or false, then the window will not open in a maximized column.
 
                         If the final value of this field is true, then the window will open in a maximized column.
+                      '';
+                    };
+                    open-maximized-to-edges = nullable types.bool // {
+                      description = ''
+                        Whether to open this window maximized to the screen edges.
+
+                        If the final value of this field is true, then this window will always open maximized to edges.
+
+                        If the final value of this field is false, then this window will never open maximized to edges.
+
+                        If the final value of this field is null, then the client gets to decide.
                       '';
                     };
                     open-fullscreen = nullable types.bool // {
@@ -3561,11 +3708,21 @@
           cfg:
           let
             cfg' = builtins.mapAttrs (lib.const toString) cfg;
+            mode-string =
+              if cfg.refresh == null then
+                "${cfg'.width}x${cfg'.height}"
+              else
+                "${cfg'.width}x${cfg'.height}@${cfg'.refresh}";
           in
-          if cfg.refresh == null then
-            "${cfg'.width}x${cfg'.height}"
-          else
-            "${cfg'.width}x${cfg'.height}@${cfg'.refresh}";
+          lib.optionalAttrs (cfg.custom or false) { custom = true; } // { inherit mode-string; };
+
+        hot-corners' = nullable map' (nullable plain) (cfg:
+          toggle "off" cfg [
+            (flag' "top-left" cfg.top-left)
+            (flag' "top-right" cfg.top-right)
+            (flag' "bottom-left" cfg.bottom-left)
+            (flag' "bottom-right" cfg.bottom-right)
+          ]);
 
         bind =
           name: cfg:
@@ -3598,6 +3755,12 @@
             [
               (lib.mapAttrsToList leaf cfg.action)
             ];
+
+        recent-window-bind =
+          name: cfg:
+          node name { } [
+            (lib.mapAttrsToList leaf cfg.action)
+          ];
 
         pointer-tablet' =
           ext: name: cfg:
@@ -3674,10 +3837,15 @@
               (flag' "focus-at-startup" cfg.focus-at-startup)
               (map' leaf transform "transform" cfg.transform)
               (nullable leaf "position" cfg.position)
-              (nullable (map' leaf mode) "mode" cfg.mode)
+              (nullable (name: cfg:
+                node name [ cfg.mode-string ] (lib.optionalAttrs (cfg.custom or false) { custom = true; })
+              ) "mode" cfg.mode)
+              (nullable leaf "modeline" cfg.modeline)
               (optional-node (cfg.variable-refresh-rate != false) (
                 leaf "variable-refresh-rate" { on-demand = cfg.variable-refresh-rate == "on-demand"; }
               ))
+              (hot-corners' "hot-corners" cfg.hot-corners)
+              (map' plain' (x: x) "layout" cfg.layout)
             ])
           ])
         ]))
@@ -3730,6 +3898,24 @@
           (flag' "empty-workspace-above-first" cfg.layout.empty-workspace-above-first)
         ])
 
+        (plain' "recent-windows" [
+          (toggle "off" cfg.recent-windows [
+            (leaf "debounce-ms" cfg.recent-windows.debounce-ms)
+            (leaf "open-delay-ms" cfg.recent-windows.open-delay-ms)
+            (plain "highlight" [
+              (leaf "active-color" cfg.recent-windows.highlight.active-color)
+              (leaf "urgent-color" cfg.recent-windows.highlight.urgent-color)
+              (leaf "padding" cfg.recent-windows.highlight.padding)
+              (leaf "corner-radius" cfg.recent-windows.highlight.corner-radius)
+            ])
+            (plain "previews" [
+              (leaf "max-height" cfg.recent-windows.previews.max-height)
+              (leaf "max-scale" cfg.recent-windows.previews.max-scale)
+            ])
+            (plain' "binds" (lib.mapAttrsToList recent-window-bind cfg.recent-windows.binds))
+          ])
+        ])
+
         (plain "cursor" [
           (leaf "xcursor-theme" cfg.cursor.theme)
           (leaf "xcursor-size" cfg.cursor.size)
@@ -3764,6 +3950,7 @@
         (each' cfg.workspaces (cfg: [
           (node "workspace" cfg.name [
             (nullable leaf "open-on-output" cfg.open-on-output)
+            (map' plain' (x: x) "layout" cfg.layout)
           ])
         ]))
 
@@ -3783,6 +3970,7 @@
             (nullable leaf "open-on-output" cfg.open-on-output)
             (nullable leaf "open-on-workspace" cfg.open-on-workspace)
             (nullable leaf "open-maximized" cfg.open-maximized)
+            (nullable leaf "open-maximized-to-edges" cfg.open-maximized-to-edges)
             (nullable leaf "open-fullscreen" cfg.open-fullscreen)
             (nullable leaf "open-floating" cfg.open-floating)
             (nullable leaf "open-focused" cfg.open-focused)
@@ -3832,7 +4020,7 @@
             (nullable leaf "delay-ms" cfg.gestures.dnd-edge-workspace-switch.delay-ms)
             (nullable leaf "max-speed" cfg.gestures.dnd-edge-workspace-switch.max-speed)
           ])
-          (plain' "hot-corners" (toggle "off" cfg.gestures.hot-corners [ ]))
+          (hot-corners' "hot-corners" cfg.gestures.hot-corners)
         ])
 
         (plain' "animations" [

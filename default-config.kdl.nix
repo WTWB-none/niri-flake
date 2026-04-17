@@ -136,6 +136,10 @@ in {
       # If the mode is omitted altogether or is invalid, niri will pick one automatically.
       # Run `niri msg outputs` while inside a niri instance to list all outputs and their modes.
       (leaf "mode" "1920x1080@120.030")
+      # You can force a custom mode even if the monitor doesn't advertise it:
+      # (node "mode" "1920x1080@100" [] { custom = true; })
+      # Or specify a raw modeline directly:
+      # (leaf "modeline" [ 173.00 1920 2048 2248 2576 1080 1083 1088 1120 "-hsync" "+vsync" ])
 
       # Position of the output in the global coordinate space.
       # This affects directional monitor actions like "focus-monitor-left", and cursor movement.
@@ -147,6 +151,19 @@ in {
       # It the position is unset or results in an overlap, the output is instead placed
       # automatically.
       (leaf "position" { x=1280; y=0; })
+
+      # Override hot corners just for this output.
+      # (plain "hot-corners" [
+      #   (flag "bottom-left")
+      #   (flag "bottom-right")
+      # ])
+
+      # You can also override layout settings per output.
+      # (plain "layout" [
+      #   (plain "default-column-width" [
+      #     (leaf "proportion" 1.0)
+      #   ])
+      # ])
     ])
 
     (plain "blur" [
@@ -262,6 +279,46 @@ in {
       # - "always", the focused column will always be centered.
       (leaf "center-focused-column" "never")
     ])
+
+    # Configure the recent windows switcher (Alt-Tab).
+    (plain "recent-windows" [
+      (leaf "debounce-ms" 750)
+      (leaf "open-delay-ms" 150)
+
+      (plain "highlight" [
+        (leaf "active-color" "#999999ff")
+        (leaf "urgent-color" "#ff9999ff")
+        (leaf "padding" 30)
+        (leaf "corner-radius" 0)
+      ])
+
+      (plain "previews" [
+        (leaf "max-height" 480)
+        (leaf "max-scale" 0.5)
+      ])
+
+      (plain "binds" [
+        (plain "Alt+Tab"         [(flag "next-window")])
+        (plain "Alt+Shift+Tab"   [(flag "previous-window")])
+        (plain "Alt+grave"       [(leaf "next-window" { filter = "app-id"; })])
+        (plain "Alt+Shift+grave" [(leaf "previous-window" { filter = "app-id"; })])
+        (plain "Mod+Tab"         [(flag "next-window")])
+        (plain "Mod+Shift+Tab"   [(flag "previous-window")])
+        (plain "Mod+grave"       [(leaf "next-window" { filter = "app-id"; })])
+        (plain "Mod+Shift+grave" [(leaf "previous-window" { filter = "app-id"; })])
+      ])
+    ])
+
+    # Named workspaces can now also override layout settings.
+    # (node "workspace" "aesthetic" [
+    #   (plain "layout" [
+    #     (leaf "gaps" 32)
+    #     (plain "border" [
+    #       (flag "on")
+    #       (leaf "width" 4)
+    #     ])
+    #   ])
+    # ])
 
     # Add lines like this to spawn processes at startup.
     # Note that running niri as a session supports xdg-desktop-autostart,
@@ -419,6 +476,9 @@ in {
 
       # Make this window open as a maximized column.
       (leaf "open-maximized" true)
+
+      # Or maximize it directly to the screen edges.
+      # (leaf "open-maximized-to-edges" true)
 
       # Make this window open fullscreen.
       (leaf "open-fullscreen" true)

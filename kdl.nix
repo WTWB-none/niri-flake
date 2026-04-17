@@ -108,14 +108,23 @@ let
       (lib.concatStringsSep "\n")
     ];
 
-  kdl-value = lib.types.nullOr (
-    lib.types.oneOf [
-      lib.types.str
-      lib.types.int
-      lib.types.float
-      lib.types.bool
-    ]
-  );
+  kdl-value =
+    let
+      base = lib.types.nullOr (
+        lib.types.oneOf [
+          lib.types.str
+          lib.types.int
+          lib.types.float
+          lib.types.bool
+        ]
+      );
+    in
+    base
+    // {
+      getSubOptions = _: { };
+      getSubModules = null;
+      substSubModules = _: base;
+    };
 
   kdl-node = lib.types.submodule {
     options.name = lib.mkOption {
@@ -135,46 +144,59 @@ let
     };
   };
 
-  kdl-leaf = lib.mkOptionType {
-    name = "kdl-leaf";
-    description = "kdl leaf";
-    descriptionClass = "noun";
-    check =
-      v: lib.isAttrs v && lib.length (builtins.attrNames (builtins.removeAttrs v [ "__functor" ])) == 1;
-    merge = lib.mergeUniqueOption {
-      message = "";
-      merge =
-        loc: defs:
-        let
-          def = builtins.head defs;
+  kdl-leaf =
+    let
+      base = lib.mkOptionType {
+        name = "kdl-leaf";
+        description = "kdl leaf";
+        descriptionClass = "noun";
+        check =
+          v: lib.isAttrs v && lib.length (builtins.attrNames (builtins.removeAttrs v [ "__functor" ])) == 1;
+        merge = lib.mergeUniqueOption {
+          message = "";
+          merge =
+            loc: defs:
+            let
+              def = builtins.head defs;
 
-          name = builtins.head (builtins.attrNames (builtins.removeAttrs def.value [ "__functor" ]));
+              name = builtins.head (builtins.attrNames (builtins.removeAttrs def.value [ "__functor" ]));
 
-          args = kdl-args.merge (loc ++ name) [
+              args = kdl-args.merge (loc ++ name) [
+                {
+                  inherit (def) file;
+                  value = def.value.${name};
+                }
+              ];
+            in
             {
-              inherit (def) file;
-              value = def.value.${name};
-            }
-          ];
-        in
-        {
-          ${name} = args;
+              ${name} = args;
+            };
         };
-    };
-  };
+        getSubOptions = _: { };
+        getSubModules = null;
+        substSubModules = _: base;
+      };
+    in
+    base;
 
   kdl-args =
     let
       arg = lib.types.either (lib.types.attrsOf kdl-value) kdl-value;
       args = lib.types.either (lib.types.listOf arg) arg;
     in
-    lib.mkOptionType {
-      name = "kdl-args";
-      description = "kdl arguments";
-      descriptionClass = "noun";
+    let
+      base = lib.mkOptionType {
+        name = "kdl-args";
+        description = "kdl arguments";
+        descriptionClass = "noun";
 
-      inherit (lib.types.uniq args) check merge;
-    };
+        inherit (lib.types.uniq args) check merge;
+        getSubOptions = _: { };
+        getSubModules = null;
+        substSubModules = _: base;
+      };
+    in
+    base;
 
   kdl-nodes = lib.types.listOf kdl-node // {
     name = "kdl-nodes";
@@ -182,27 +204,34 @@ let
     descriptionClass = "noun";
   };
 
-  kdl-document = lib.mkOptionType {
-    name = "kdl-document";
-    description = "kdl document";
-    descriptionClass = "noun";
+  kdl-document =
+    let
+      base = lib.mkOptionType {
+        name = "kdl-document";
+        description = "kdl document";
+        descriptionClass = "noun";
 
-    check = v: builtins.isList v || builtins.isAttrs v;
-    merge =
-      loc: defs:
-      kdl-nodes.merge loc (
-        map (def: {
-          inherit (def) file;
-          value =
-            let
-              value' = lib.remove null (lib.flatten def.value);
-            in
-            lib.warnIf (def.value != value')
-              "kdl document defined in `${def.file}` for `${lib.showOption loc}` is not normalized. please ensure that it is a flat list of nodes."
-              value';
-        }) defs
-      );
-  };
+        check = v: builtins.isList v || builtins.isAttrs v;
+        merge =
+          loc: defs:
+          kdl-nodes.merge loc (
+            map (def: {
+              inherit (def) file;
+              value =
+                let
+                  value' = lib.remove null (lib.flatten def.value);
+                in
+                lib.warnIf (def.value != value')
+                  "kdl document defined in `${def.file}` for `${lib.showOption loc}` is not normalized. please ensure that it is a flat list of nodes."
+                  value';
+            }) defs
+          );
+        getSubOptions = _: { };
+        getSubModules = null;
+        substSubModules = _: base;
+      };
+    in
+    base;
 in
 {
   inherit

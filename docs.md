@@ -540,6 +540,31 @@ use the key instead. If you do care about it, you can use the key to order them,
 and a `name` attribute to have a friendlier name.
 
 
+## `programs.niri.settings.workspaces.<name>.layout`
+- type: `null or (list of (submodule))`
+- default: `null`
+
+Workspace-specific `layout {}` override.
+
+This is represented as raw KDL child nodes inside the workspace's `layout` block.
+
+
+## `programs.niri.settings.workspaces.<name>.layout.*.arguments`
+- type: `list of (null or string or signed integer or floating point number or boolean)`
+
+
+## `programs.niri.settings.workspaces.<name>.layout.*.children`
+- type: `kdl document`
+
+
+## `programs.niri.settings.workspaces.<name>.layout.*.name`
+- type: `string`
+
+
+## `programs.niri.settings.workspaces.<name>.layout.*.properties`
+- type: `attribute set of (null or string or signed integer or floating point number or boolean)`
+
+
 ## `programs.niri.settings.workspaces.<name>.name`
 - type: `string`
 - default: `the key of the workspace`
@@ -615,6 +640,73 @@ This behaves like a [CSS box-shadow spread radius](https://developer.mozilla.org
 - default: `null`
 
 Control how much the workspaces zoom out in the overview. zoom ranges from 0 to 0.75 where lower values make everything smaller.
+
+
+<!-- programs.niri.settings.recent-windows -->
+
+## `programs.niri.settings.recent-windows.debounce-ms`
+- type: `signed integer`
+- default: `750`
+
+Delay, in milliseconds, before a newly focused window is committed to the recent windows list.
+
+
+## `programs.niri.settings.recent-windows.enable`
+- type: `boolean`
+- default: `true`
+
+Whether to enable the recent windows switcher.
+
+
+## `programs.niri.settings.recent-windows.open-delay-ms`
+- type: `signed integer`
+- default: `150`
+
+Delay, in milliseconds, before the switcher appears on screen.
+
+
+## `programs.niri.settings.recent-windows.binds`
+- type: `attribute set of (recent windows keybind)`
+
+Binds that open and navigate the recent windows switcher.
+
+
+## `programs.niri.settings.recent-windows.binds.<name>.action`
+- type: `recent windows action`, which is a `kdl leaf`
+
+
+<!-- programs.niri.settings.recent-windows.highlight -->
+
+## `programs.niri.settings.recent-windows.highlight.active-color`
+- type: `string`
+- default: `"#999999ff"`
+
+
+## `programs.niri.settings.recent-windows.highlight.corner-radius`
+- type: `floating point number or signed integer`
+- default: `0`
+
+
+## `programs.niri.settings.recent-windows.highlight.padding`
+- type: `signed integer`
+- default: `30`
+
+
+## `programs.niri.settings.recent-windows.highlight.urgent-color`
+- type: `string`
+- default: `"#ff9999ff"`
+
+
+<!-- programs.niri.settings.recent-windows.previews -->
+
+## `programs.niri.settings.recent-windows.previews.max-height`
+- type: `signed integer`
+- default: `480`
+
+
+## `programs.niri.settings.recent-windows.previews.max-scale`
+- type: `floating point number or signed integer`
+- default: `0.500000`
 
 
 ## `programs.niri.settings.input.focus-follows-mouse.enable`
@@ -1371,6 +1463,75 @@ If multiple outputs with `focus-at-startup` are connected, then the one with the
 When none of the connected outputs are explicitly focus-at-startup, niri will focus the first one sorted by name (same output sorting as used elsewhere in niri).
 
 
+## `programs.niri.settings.outputs.<name>.hot-corners`
+- type: `null or (submodule)`
+- default: `null`
+
+Override hot corners for this output.
+
+When this is null, the global [`gestures.hot-corners`](#programsnirisettingsgestureshot-corners) settings are used.
+
+
+## `programs.niri.settings.outputs.<name>.hot-corners.bottom-left`
+- type: `boolean`
+- default: `false`
+
+Whether to enable the bottom-left hot corner.
+
+
+## `programs.niri.settings.outputs.<name>.hot-corners.bottom-right`
+- type: `boolean`
+- default: `false`
+
+Whether to enable the bottom-right hot corner.
+
+
+## `programs.niri.settings.outputs.<name>.hot-corners.enable`
+- type: `boolean`
+- default: `true`
+
+Whether to enable hot corners.
+
+
+## `programs.niri.settings.outputs.<name>.hot-corners.top-left`
+- type: `boolean`
+- default: `false`
+
+Whether to enable the top-left hot corner.
+
+
+## `programs.niri.settings.outputs.<name>.hot-corners.top-right`
+- type: `boolean`
+- default: `false`
+
+Whether to enable the top-right hot corner.
+
+
+## `programs.niri.settings.outputs.<name>.layout`
+- type: `null or (list of (submodule))`
+- default: `null`
+
+Output-specific `layout {}` override.
+
+This is represented as raw KDL child nodes inside the output's `layout` block.
+
+
+## `programs.niri.settings.outputs.<name>.layout.*.arguments`
+- type: `list of (null or string or signed integer or floating point number or boolean)`
+
+
+## `programs.niri.settings.outputs.<name>.layout.*.children`
+- type: `kdl document`
+
+
+## `programs.niri.settings.outputs.<name>.layout.*.name`
+- type: `string`
+
+
+## `programs.niri.settings.outputs.<name>.layout.*.properties`
+- type: `attribute set of (null or string or signed integer or floating point number or boolean)`
+
+
 ## `programs.niri.settings.outputs.<name>.mode`
 - type: `null or (submodule)`
 - default: `null`
@@ -1380,6 +1541,13 @@ The resolution and refresh rate of this display.
 By default, when this is null, niri will automatically pick a mode for you.
 
 If this is set to an invalid mode (i.e unsupported by this output), niri will act as if it is unset and pick one for you.
+
+
+## `programs.niri.settings.outputs.<name>.mode.custom`
+- type: `boolean`
+- default: `false`
+
+Whether to treat this as a custom mode rather than one advertised by the monitor.
 
 
 ## `programs.niri.settings.outputs.<name>.mode.height`
@@ -1395,6 +1563,34 @@ The refresh rate of this output. When this is null, but the resolution is set, n
 
 ## `programs.niri.settings.outputs.<name>.mode.width`
 - type: `signed integer`
+
+
+## `programs.niri.settings.outputs.<name>.modeline`
+- type: `null or (list of anything)`
+- default: `null`
+
+A custom modeline for this output.
+
+This corresponds to the raw arguments of the KDL `modeline` node, for example:
+
+```nix
+{
+  programs.niri.settings.outputs."eDP-3".modeline = [
+    173.00
+    1920
+    2048
+    2248
+    2576
+    1080
+    1083
+    1088
+    1120
+    "-hsync"
+    "+vsync"
+  ];
+}
+```
+
 
 
 ## `programs.niri.settings.outputs.<name>.name`
@@ -2309,11 +2505,45 @@ When the cursor is at boundary of the trigger height, the view will not be scrol
 The height of the edge of the screen where dragging a window will scroll the view.
 
 
+## `programs.niri.settings.gestures.hot-corners`
+
+
+Put your mouse at configured monitor corners to toggle the overview. Also works during drag-and-dropping something.
+
+
+## `programs.niri.settings.gestures.hot-corners.bottom-left`
+- type: `boolean`
+- default: `false`
+
+Whether to enable the bottom-left hot corner.
+
+
+## `programs.niri.settings.gestures.hot-corners.bottom-right`
+- type: `boolean`
+- default: `false`
+
+Whether to enable the bottom-right hot corner.
+
+
 ## `programs.niri.settings.gestures.hot-corners.enable`
 - type: `boolean`
 - default: `true`
 
-Put your mouse at the very top-left corner of a monitor to toggle the overview. Also works during drag-and-dropping something.
+Whether to enable hot corners.
+
+
+## `programs.niri.settings.gestures.hot-corners.top-left`
+- type: `boolean`
+- default: `false`
+
+Whether to enable the top-left hot corner.
+
+
+## `programs.niri.settings.gestures.hot-corners.top-right`
+- type: `boolean`
+- default: `false`
+
+Whether to enable the top-right hot corner.
 
 
 ## `programs.niri.settings.environment`
@@ -2675,6 +2905,19 @@ Whether to open this window in a maximized column.
 If the final value of this field is null or false, then the window will not open in a maximized column.
 
 If the final value of this field is true, then the window will open in a maximized column.
+
+
+## `programs.niri.settings.window-rules.*.open-maximized-to-edges`
+- type: `null or boolean`
+- default: `null`
+
+Whether to open this window maximized to the screen edges.
+
+If the final value of this field is true, then this window will always open maximized to edges.
+
+If the final value of this field is false, then this window will never open maximized to edges.
+
+If the final value of this field is null, then the client gets to decide.
 
 
 ## `programs.niri.settings.window-rules.*.open-on-output`
@@ -3080,16 +3323,6 @@ Takes effect only when the window is on an output with [`outputs.<name>.variable
 - default: `null`
 
 
-## `programs.niri.settings.window-rules.*.background-effect.noise`
-- type: `null or floating point number or signed integer`
-- default: `null`
-
-
-## `programs.niri.settings.window-rules.*.background-effect.saturation`
-- type: `null or floating point number or signed integer`
-- default: `null`
-
-
 ## `programs.niri.settings.window-rules.*.background-effect.xray`
 - type: `null or boolean`
 - default: `null`
@@ -3258,16 +3491,6 @@ Note that this is applied in addition to the opacity set by the client. Setting 
 
 ## `programs.niri.settings.layer-rules.*.background-effect.blur`
 - type: `null or boolean`
-- default: `null`
-
-
-## `programs.niri.settings.layer-rules.*.background-effect.noise`
-- type: `null or floating point number or signed integer`
-- default: `null`
-
-
-## `programs.niri.settings.layer-rules.*.background-effect.saturation`
-- type: `null or floating point number or signed integer`
 - default: `null`
 
 
