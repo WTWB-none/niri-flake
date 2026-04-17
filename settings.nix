@@ -3727,7 +3727,7 @@
               else
                 "${cfg'.width}x${cfg'.height}@${cfg'.refresh}";
           in
-          lib.optionalAttrs (cfg.custom or false) { custom = true; } // { inherit mode-string; };
+          lib.optionalAttrs ((cfg.custom or false) == true) { custom = true; } // { inherit mode-string; };
 
         hot-corners' = nullable (map' (nullable plain) (cfg:
           toggle-nullable "off" cfg [
@@ -3855,7 +3855,9 @@
                 let
                   rendered = mode cfg;
                 in
-                node name [ rendered."mode-string" ] (lib.optionalAttrs (rendered.custom or false) { custom = true; })
+                node name [ rendered."mode-string" ] (
+                  lib.optionalAttrs ((rendered.custom or false) == true) { custom = true; }
+                )
               ) "mode" cfg.mode)
               (nullable leaf "modeline" cfg.modeline)
               (optional-node (cfg.variable-refresh-rate != false) (
