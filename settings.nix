@@ -611,27 +611,27 @@
       };
 
       hot-corners-type = record {
-        enable = optional types.bool true // {
+        enable = nullable types.bool // {
           description = ''
             Whether to enable hot corners.
           '';
         };
-        top-left = optional types.bool false // {
+        top-left = nullable types.bool // {
           description = ''
             Whether to enable the top-left hot corner.
           '';
         };
-        top-right = optional types.bool false // {
+        top-right = nullable types.bool // {
           description = ''
             Whether to enable the top-right hot corner.
           '';
         };
-        bottom-left = optional types.bool false // {
+        bottom-left = nullable types.bool // {
           description = ''
             Whether to enable the bottom-left hot corner.
           '';
         };
-        bottom-right = optional types.bool false // {
+        bottom-right = nullable types.bool // {
           description = ''
             Whether to enable the bottom-right hot corner.
           '';
@@ -1495,35 +1495,35 @@
                   };
                 };
               in
-              ordered-section [
+              nullable (ordered-section [
                 {
-                  enable = optional types.bool true // {
+                  enable = nullable types.bool // {
                     description = ''
                       Whether to enable the recent windows switcher.
                     '';
                   };
-                  debounce-ms = optional types.int 750 // {
+                  debounce-ms = nullable types.int // {
                     description = ''
                       Delay, in milliseconds, before a newly focused window is committed to the recent windows list.
                     '';
                   };
-                  open-delay-ms = optional types.int 150 // {
+                  open-delay-ms = nullable types.int // {
                     description = ''
                       Delay, in milliseconds, before the switcher appears on screen.
                     '';
                   };
                 }
                 {
-                  highlight = section {
-                    active-color = optional types.str "#999999ff";
-                    urgent-color = optional types.str "#ff9999ff";
-                    padding = optional types.int 30;
-                    corner-radius = optional float-or-int 0;
-                  };
-                  previews = section {
-                    max-height = optional types.int 480;
-                    max-scale = optional float-or-int 0.5;
-                  };
+                  highlight = nullable (record {
+                    active-color = nullable types.str;
+                    urgent-color = nullable types.str;
+                    padding = nullable types.int;
+                    corner-radius = nullable float-or-int;
+                  });
+                  previews = nullable (record {
+                    max-height = nullable types.int;
+                    max-scale = nullable float-or-int;
+                  });
                   binds = attrs-record' "recent windows keybind" {
                     action = required (rename "recent windows action" kdl.types.kdl-leaf);
                   } // {
@@ -1532,7 +1532,12 @@
                     '';
                   };
                 }
-              ];
+              ])
+              // {
+                description = ''
+                  Configure the recent windows switcher.
+                '';
+              };
           }
 
           {
@@ -2001,7 +2006,7 @@
                       The refresh rate of this output. When this is null, but the resolution is set, niri will automatically pick the highest available refresh rate.
                     '';
                   };
-                  custom = optional types.bool false // {
+                  custom = nullable types.bool // {
                     description = ''
                       Whether to treat this as a custom mode rather than one advertised by the monitor.
                     '';
@@ -2616,7 +2621,7 @@
                     '';
                   };
                 hot-corners =
-                  optional hot-corners-type { }
+                  nullable hot-corners-type
                   // {
                     description = ''
                       Put your mouse at configured monitor corners to toggle the overview. Also works during drag-and-dropping something.
@@ -3527,6 +3532,10 @@
           disabled: cfg: contents:
           if cfg.enable then contents else flag disabled;
 
+        toggle-nullable =
+          disabled: cfg: contents:
+          if cfg.enable == false then flag disabled else contents;
+
         toggle' = disabled: cfg: contents: [
           (flag' disabled (cfg.enable == false))
           contents
@@ -3717,7 +3726,7 @@
           lib.optionalAttrs (cfg.custom or false) { custom = true; } // { inherit mode-string; };
 
         hot-corners' = nullable map' (nullable plain) (cfg:
-          toggle "off" cfg [
+          toggle-nullable "off" cfg [
             (flag' "top-left" cfg.top-left)
             (flag' "top-right" cfg.top-right)
             (flag' "bottom-left" cfg.bottom-left)
@@ -3898,23 +3907,29 @@
           (flag' "empty-workspace-above-first" cfg.layout.empty-workspace-above-first)
         ])
 
-        (plain' "recent-windows" [
-          (toggle "off" cfg.recent-windows [
-            (leaf "debounce-ms" cfg.recent-windows.debounce-ms)
-            (leaf "open-delay-ms" cfg.recent-windows.open-delay-ms)
-            (plain "highlight" [
-              (leaf "active-color" cfg.recent-windows.highlight.active-color)
-              (leaf "urgent-color" cfg.recent-windows.highlight.urgent-color)
-              (leaf "padding" cfg.recent-windows.highlight.padding)
-              (leaf "corner-radius" cfg.recent-windows.highlight.corner-radius)
+        (nullable (name: cfg:
+          plain' name [
+            (toggle-nullable "off" cfg [
+              (nullable leaf "debounce-ms" cfg.debounce-ms)
+              (nullable leaf "open-delay-ms" cfg.open-delay-ms)
+              (nullable (name: highlight:
+                plain' name [
+                  (nullable leaf "active-color" highlight.active-color)
+                  (nullable leaf "urgent-color" highlight.urgent-color)
+                  (nullable leaf "padding" highlight.padding)
+                  (nullable leaf "corner-radius" highlight.corner-radius)
+                ]
+              ) "highlight" cfg.highlight)
+              (nullable (name: previews:
+                plain' name [
+                  (nullable leaf "max-height" previews.max-height)
+                  (nullable leaf "max-scale" previews.max-scale)
+                ]
+              ) "previews" cfg.previews)
+              (plain' "binds" (lib.mapAttrsToList recent-window-bind cfg.binds))
             ])
-            (plain "previews" [
-              (leaf "max-height" cfg.recent-windows.previews.max-height)
-              (leaf "max-scale" cfg.recent-windows.previews.max-scale)
-            ])
-            (plain' "binds" (lib.mapAttrsToList recent-window-bind cfg.recent-windows.binds))
-          ])
-        ])
+          ]
+        ) "recent-windows" cfg.recent-windows)
 
         (plain "cursor" [
           (leaf "xcursor-theme" cfg.cursor.theme)
