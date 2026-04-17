@@ -3640,12 +3640,15 @@
 
         animation = map' plain' (
           cfg:
+          let
+            kind = cfg.kind or null;
+          in
           toggle "off" cfg [
-            (optional-node (cfg.kind ? easing) [
-              (leaf "duration-ms" cfg.kind.easing.duration-ms)
-              (leaf "curve" ([ cfg.kind.easing.curve ] ++ cfg.kind.easing.curve-args))
+            (optional-node (builtins.isAttrs kind && kind ? easing) [
+              (leaf "duration-ms" kind.easing.duration-ms)
+              (leaf "curve" ([ kind.easing.curve ] ++ kind.easing.curve-args))
             ])
-            (nullable leaf "spring" cfg.kind.spring or null)
+            (nullable leaf "spring" (if builtins.isAttrs kind then kind.spring or null else null))
             (nullable leaf "custom-shader" cfg.custom-shader or null)
           ]
         );
@@ -3695,14 +3698,14 @@
           (nullable leaf "blur" cfg.blur)
         ]);
 
-        global-blur' = nullable map' (nullable plain) (cfg: [
+        global-blur' = nullable (map' (nullable plain) (cfg: [
           (toggle "off" cfg [
             (leaf "passes" cfg.passes)
             (leaf "offset" cfg.offset)
             (leaf "noise" cfg.noise)
             (leaf "saturation" cfg.saturation)
           ])
-        ]);
+        ]));
 
         transform =
           cfg:
@@ -3726,13 +3729,13 @@
           in
           lib.optionalAttrs (cfg.custom or false) { custom = true; } // { inherit mode-string; };
 
-        hot-corners' = nullable map' (nullable plain) (cfg:
+        hot-corners' = nullable (map' (nullable plain) (cfg:
           toggle-nullable "off" cfg [
             (flag' "top-left" cfg.top-left)
             (flag' "top-right" cfg.top-right)
             (flag' "bottom-left" cfg.bottom-left)
             (flag' "bottom-right" cfg.bottom-right)
-          ]);
+          ]));
 
         bind =
           name: cfg:
