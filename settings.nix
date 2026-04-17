@@ -3855,9 +3855,10 @@
                 let
                   rendered = mode cfg;
                 in
-                node name [ rendered."mode-string" ] (
-                  lib.optionalAttrs ((rendered.custom or false) == true) { custom = true; }
-                )
+                node name [
+                  rendered."mode-string"
+                  (lib.optionalAttrs ((rendered.custom or false) == true) { custom = true; })
+                ] [ ]
               ) "mode" cfg.mode)
               (nullable leaf "modeline" cfg.modeline)
               (optional-node (cfg.variable-refresh-rate != false) (
