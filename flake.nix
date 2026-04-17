@@ -416,6 +416,19 @@
         }:
         let
           cfg = config.programs.niri;
+          is-background-effect-supported =
+            let
+              version = cfg.package.version or "";
+            in
+            nixpkgs.lib.hasPrefix "unstable-" version || nixpkgs.lib.versionAtLeast version "26.05";
+
+          uses-background-effect =
+            let
+              has-background-effect = rule: (rule.background-effect or null) != null;
+              settings = cfg.settings or { };
+            in
+            builtins.any has-background-effect (settings.window-rules or [ ])
+            || builtins.any has-background-effect (settings.layer-rules or [ ]);
         in
         {
           imports = [
@@ -437,6 +450,20 @@
               }) (import ./memo-binds.nix)
             );
           };
+
+          config.assertions = [
+            {
+              assertion = !uses-background-effect || is-background-effect-supported;
+              message = ''
+                `programs.niri.settings.{window-rules,layer-rules}.*.background-effect` requires a niri build with window effects support.
+
+                The selected package is `${cfg.package.name or cfg.package.pname or "niri"}`
+                with version `${cfg.package.version or "unknown"}`, which is too old.
+
+                Use `programs.niri.package = pkgs.niri-unstable;` or a release `>= 26.05`.
+              '';
+            }
+          ];
 
           config.xdg.configFile.niri-config = {
             enable = cfg.finalConfig != null;
