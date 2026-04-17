@@ -3851,7 +3851,7 @@
               (map' leaf transform "transform" cfg.transform)
               (nullable leaf "position" cfg.position)
               (nullable (name: cfg:
-                node name [ cfg.mode-string ] (lib.optionalAttrs (cfg.custom or false) { custom = true; })
+                node name [ cfg."mode-string" ] (lib.optionalAttrs (cfg.custom or false) { custom = true; })
               ) "mode" cfg.mode)
               (nullable leaf "modeline" cfg.modeline)
               (optional-node (cfg.variable-refresh-rate != false) (
