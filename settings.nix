@@ -2858,7 +2858,7 @@
                   }
                   {
                     background-effect = nullable (record {
-                      blur = nullable types.bool;
+                      blur = required types.bool;
                     });
                   }
                 ]
